@@ -17,10 +17,10 @@ after_success:
   # Log in to the Docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin docker.io
   # Take the images to docker hub
-  - docker push costalago/multi-client:latest
-  - docker push costalago/multi-nginx:latest
-  - docker push costalago/multi-server:latest
-  - docker push costalago/multi-worker:latest
+  - docker push costalago/multi-client
+  - docker push costalago/multi-nginx
+  - docker push costalago/multi-server
+  - docker push costalago/multi-worker
 
 
 
