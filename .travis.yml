@@ -10,10 +10,10 @@ script:
   - docker run -e CI=true costalago/react-test npm test
 
 after_success:
-  - docker build -t costalago/multi-client -f ./client
-  - docker build -t costalago/multi-nginx -f ./nginx
-  - docker build -t costalago/multi-server -f ./server
-  - docker build -t costalago/multi-worker -f ./worker
+  - docker build -t costalago/multi-client ./client
+  - docker build -t costalago/multi-nginx ./nginx
+  - docker build -t costalago/multi-server ./server
+  - docker build -t costalago/multi-worker ./worker
   # Log in to the Docker CLI
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin docker.io
   # Take the images to docker hub
