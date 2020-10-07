@@ -1,37 +1,27 @@
-language: generic
 sudo: required
 services:
   - docker
-
+env:
+  global:
+    - SHA=$(git rev-parse --short HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
+  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
+  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - source $HOME/google-cloud-sdk/path.bash.inc
+  - gcloud components update kubectl
+  - gcloud auth activate-service-account --key-file service-account.json
+  - gcloud config set project udemy-multi-k8s-289116
+  - gcloud config set compute/zone europe-west2-a
+  - gcloud container clusters get-credentials multi-cluster
+  - echo "DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t costalago/react-test -f ./client/Dockerfile.dev ./client
 
 script:
   - docker run -e CI=true costalago/react-test npm test
 
-after_success:
-  - docker build -t costalago/multi-client ./client
-  - docker build -t costalago/multi-nginx ./nginx
-  - docker build -t costalago/multi-server ./server
-  - docker build -t costalago/multi-worker ./worker
-  # Log in to the Docker CLI
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin docker.io
-  # Take the images to docker hub
-  - docker push costalago/multi-client
-  - docker push costalago/multi-nginx
-  - docker push costalago/multi-server
-  - docker push costalago/multi-worker
-
 deploy:
-  provider: elasticbeanstalk
-  region: eu-west-1
-  app: multi-docker
-  env: MultiDocker-env-1
-  bucket_name: elasticbeanstalk-eu-west-1-512418949345
-  bucket_path: docker-multi
+  provider: script
+  script: bash ./deploy.sh
   on:
     branch: master
-  access_key_id: $AWS_ACCESS_KEY
-  secret_access_key: $AWS_SECRET_KEY
-
-
